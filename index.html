@@ -27,10 +27,18 @@
         body { background-color: var(--bg); color: var(--text); padding: 24px; line-height: 1.6; }
         .wrapper { max-width: 960px; margin: 0 auto; background: var(--card-bg); padding: 36px; border-radius: var(--radius); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); border: 1px solid var(--border); }
         
-        header { border-bottom: 3px solid var(--primary); padding-bottom: 16px; margin-bottom: 28px; }
+        header { border-bottom: 3px solid var(--primary); padding-bottom: 16px; margin-bottom: 24px; }
         header h1 { font-size: 2.2rem; color: var(--primary); display: flex; align-items: center; gap: 10px; }
         header p { color: var(--text-muted); font-size: 1.05rem; }
         .badge { background: var(--secondary); color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+
+        /* Abas de Navegação */
+        .tabs { display: flex; gap: 10px; margin-bottom: 24px; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+        .tab-btn { background: #e2e8f0; border: none; padding: 10px 20px; font-weight: 600; font-size: 1rem; border-radius: 6px; cursor: pointer; color: var(--text-muted); transition: 0.2s; }
+        .tab-btn.active { background: var(--primary); color: white; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
 
         section { margin-bottom: 32px; background: #fff; padding: 20px; border: 1px solid var(--border); border-radius: 8px; }
         section h2 { font-size: 1.25rem; color: var(--primary); border-bottom: 2px solid var(--bg); padding-bottom: 8px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
@@ -48,9 +56,9 @@
         textarea { min-height: 90px; resize: vertical; }
 
         /* Estúdio de Gravação */
-        .audio-box { background: #f1f5f9; padding: 20px; border-radius: 8px; border: 1px dashed var(--primary-light); text-align: center; }
-        .timer { font-size: 2rem; font-weight: bold; font-family: monospace; color: var(--primary); margin: 10px 0; }
-        .controls { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        .audio-box { background: #f1f5f9; padding: 30px; border-radius: 8px; border: 1px dashed var(--primary-light); text-align: center; }
+        .timer { font-size: 2.5rem; font-weight: bold; font-family: monospace; color: var(--primary); margin: 15px 0; }
+        .controls { display: flex; justify-content: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
         
         .btn { padding: 10px 18px; font-size: 0.95rem; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 6px; }
         .btn-primary { background: var(--primary); color: white; }
@@ -68,15 +76,18 @@
         .checklist-item input { margin-top: 4px; }
 
         /* Ações e Exportação */
-        .export-actions { background: #e0e7ff; padding: 20px; border-radius: 8px; text-align: center; }
+        .export-actions { background: #e0e7ff; padding: 20px; border-radius: 8px; text-align: center; margin-top: 20px; }
         .export-actions h3 { color: var(--primary); margin-bottom: 12px; }
         .export-buttons { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
 
-        /* Ocultar elementos na impressão (PDF) */
+        /* Salvo feedback */
+        #saveStatus { font-size: 0.85rem; color: #16a34a; font-weight: 600; float: right; margin-top: 5px; }
+
         @media print {
             body { padding: 0; background: #fff; }
             .wrapper { box-shadow: none; border: none; padding: 0; }
-            .no-print, .export-actions, .audio-box, button { display: none !important; }
+            .no-print, .export-actions, .tabs, button { display: none !important; }
+            .tab-content { display: block !important; }
             input, textarea, select { border: none !important; background: transparent !important; padding: 0 !important; }
             textarea { resize: none; }
         }
@@ -88,192 +99,268 @@
     <header>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
             <h1>🎙️ RH em Voz <span class="badge">Profª Bárbara</span></h1>
-            <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted);">Comunicação Corporativa & RH</span>
+            <span id="saveStatus">💾 Alterações salvas automaticamente</span>
         </div>
-        <p>Gerador de Roteiro Oficial de Produção de Podcast e Estúdio de Gravação</p>
+        <p>Gerador de Roteiro Oficial de Produção e Estúdio de Gravação</p>
     </header>
 
+    <!-- ABAS DE NAVEGAÇÃO -->
+    <div class="tabs no-print">
+        <button class="tab-btn active" onclick="switchTab('roteiroTab', this)">📝 1. Roteiro e Formulário</button>
+        <button class="tab-btn" onclick="switchTab('estudioTab', this)">🎙️ 2. Estúdio de Gravação</button>
+    </div>
+
     <form id="podcastForm">
-        <!-- 1. INFORMAÇÕES DE IDENTIFICAÇÃO -->
-        <section>
-            <h2>1. Informações de Identificação</h2>
-            <div class="grid-3">
+        
+        <!-- ABA 1: ROTEIRO -->
+        <div id="roteiroTab" class="tab-content active">
+            <!-- INFORMAÇÕES DE IDENTIFICAÇÃO -->
+            <section>
+                <h2>1. Informações de Identificação</h2>
+                <div class="grid-3">
+                    <div class="form-group">
+                        <label for="data">Data de Produção</label>
+                        <input type="date" id="data" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="numEpisodio">Nº do Episódio</label>
+                        <input type="number" id="numEpisodio" placeholder="Ex: 01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="turma">Turmas Participantes</label>
+                        <input type="text" id="turma" placeholder="Ex: 2º RH - ETEC" required>
+                    </div>
+                </div>
+
                 <div class="form-group">
-                    <label for="data">Data de Produção</label>
-                    <input type="date" id="data" required>
+                    <label for="tema">Tema Escolhido</label>
+                    <input type="text" id="tema" placeholder="Ex: Prevenção e Enfrentamento ao Assédio no Ambiente de Trabalho" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="integrantes">Integrantes da Equipe (Todos os Nomes)</label>
+                    <textarea id="integrantes" placeholder="Listar o nome completo de todos os alunos da equipe..." required></textarea>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="coordenador">Coordenador(a) da Equipe</label>
+                        <input type="text" id="coordenador" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="apresentador">Apresentador(a)</label>
+                        <input type="text" id="apresentador" required>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="coapresentadores">Coapresentadores(as)</label>
+                        <input type="text" id="coapresentadores" placeholder="Separe por vírgula">
+                    </div>
+                    <div class="form-group">
+                        <label for="pesquisadores">Responsáveis pela Pesquisa</label>
+                        <input type="text" id="pesquisadores" placeholder="Separe por vírgula" required>
+                    </div>
+                </div>
+
+                <div class="grid-3">
+                    <div class="form-group">
+                        <label for="roteirista">Responsável pelo Roteiro</label>
+                        <input type="text" id="roteirista" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gravacao">Responsável pela Gravação</label>
+                        <input type="text" id="gravacao" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editor">Responsável pela Edição</label>
+                        <input type="text" id="editor" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="tituloSpotify">Título para Publicação no Spotify</label>
+                    <input type="text" id="tituloSpotify" placeholder="Título chamativo e profissional" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="textoSpotify">Texto de Apresentação (Sinopse para o Spotify)</label>
+                    <textarea id="textoSpotify" placeholder="Escreva um breve texto apresentando o tema, despertando o interesse e resumindo a discussão..." required></textarea>
+                </div>
+            </section>
+
+            <!-- INFORMAÇÕES DE DESENVOLVIMENTO -->
+            <section>
+                <h2>2. Informações de Desenvolvimento</h2>
+                <div class="form-group">
+                    <label for="introducao">1. Introdução do Tema (Abertura e Contextualização)</label>
+                    <textarea id="introducao" placeholder="Como será a vinheta/fala inicial para captar a atenção do ouvinte..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="perguntasNorteadoras">2. Perguntas Norteadoras e Argumentação</label>
+                    <textarea id="perguntasNorteadoras" placeholder="Selecione as perguntas relevantes, estruture as respostas com argumentos, dados e exemplos..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="dadosExternos">3. Dados, Estatísticas e Fontes Externas (Legislação, Notícias, Pesquisas)</label>
+                    <textarea id="dadosExternos" placeholder="Indique dados, estatísticas, leis (ex: CLT, Código Penal) e os respetivos links das fontes..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="aprendizadoProposto">4. Aprendizado Proposto e Relação com a Área Corporativa</label>
+                    <textarea id="aprendizadoProposto" placeholder="Relacione o tema com Endomarketing, Comunicação Corporativa e RH. Apresente exemplos práticos." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="conclusaoEpisodio">5. Conclusão, Reflexão e Despedida</label>
+                    <textarea id="conclusaoEpisodio" placeholder="Síntese dos aprendizados, mensagem final, chamada para o próximo episódio e agradecimentos..." required></textarea>
+                </div>
+            </section>
+
+            <!-- DESAFIO ESPECIAL — E SE O RH FOSSE VOCÊ? -->
+            <section style="border-left: 4px solid var(--accent);">
+                <h2>3. Desafio Especial — E se o RH fosse você?</h2>
+                <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 12px;">Apresentem uma situação-problema ética/organizacional responsável e fundamentem as ações necessárias.</p>
+                
+                <div class="form-group">
+                    <label for="problemaIdentificado">1. Qual é o problema identificado?</label>
+                    <textarea id="problemaIdentificado" required></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="numEpisodio">Nº do Episódio</label>
-                    <input type="number" id="numEpisodio" placeholder="Ex: 01" required>
+                    <label for="direitosViolados">2. Quais direitos podem estar sendo violados?</label>
+                    <textarea id="direitosViolados" required></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="turma">Turmas Participantes</label>
-                    <input type="text" id="turma" placeholder="Ex: 2º RH - ETEC" required>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="tema">Tema Escolhido</label>
-                <input type="text" id="tema" placeholder="Ex: Prevenção e Enfrentamento ao Assédio no Ambiente de Trabalho" required>
-            </div>
-
-            <div class="form-group">
-                <label for="integrantes">Integrantes da Equipe (Todos os Nomes)</label>
-                <textarea id="integrantes" placeholder="Listar o nome completo de todos os alunos da equipe..." required></textarea>
-            </div>
-
-            <div class="grid-2">
-                <div class="form-group">
-                    <label for="coordenador">Coordenador(a) da Equipe</label>
-                    <input type="text" id="coordenador" required>
+                    <label for="primeiraAtitude">3. Qual deve ser a primeira atitude do RH?</label>
+                    <textarea id="primeiraAtitude" required></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="apresentador">Apresentador(a)</label>
-                    <input type="text" id="apresentador" required>
-                </div>
-            </div>
-
-            <div class="grid-2">
-                <div class="form-group">
-                    <label for="coapresentadores">Coapresentadores(as)</label>
-                    <input type="text" id="coapresentadores" placeholder="Separe por vírgula">
+                    <label for="protecaoEnvolvidos">4. Como proteger as pessoas envolvidas?</label>
+                    <textarea id="protecaoEnvolvidos" required></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="pesquisadores">Responsáveis pela Pesquisa</label>
-                    <input type="text" id="pesquisadores" placeholder="Separe por vírgula" required>
+                    <label for="medidasOrganizacionais">5. Quais medidas devem ser tomadas pela organização?</label>
+                    <textarea id="medidasOrganizacionais" required></textarea>
                 </div>
-            </div>
+            </section>
 
-            <div class="grid-3">
-                <div class="form-group">
-                    <label for="roteirista">Responsável pelo Roteiro</label>
-                    <input type="text" id="roteirista" required>
+            <!-- CRITÉRIOS DE QUALIDADE & CHECKLIST -->
+            <section class="no-print">
+                <h2>4. Check de Critérios de Produção e Qualidade</h2>
+                <div class="checklist">
+                    <label class="checklist-item"><input type="checkbox" required> Todos os integrantes participaram da produção.</label>
+                    <label class="checklist-item"><input type="checkbox" required> Roteiro preenchido integralmente.</label>
+                    <label class="checklist-item"><input type="checkbox" required> Conceitos pesquisados e corretos.</label>
+                    <label class="checklist-item"><input type="checkbox" required> Perguntas norteadoras respondidas.</label>
+                    <label class="checklist-item"><input type="checkbox" required> Pelo menos um caso real contextualizado.</label>
+                    <label class="checklist-item"><input type="checkbox" required> Fontes e links identificados.</label>
+                    <label class="checklist-item"><input type="checkbox" required> Relacionado a Endomarketing, RH e Comunicação.</label>
+                    <label class="checklist-item"><input type="checkbox" required> Situação-problema debatida com ética.</label>
+                    <label class="checklist-item"><input type="checkbox" required> Áudio legível no tempo (5 a 8 minutos).</label>
+                    <label class="checklist-item"><input type="checkbox" required> Conclusão com reflexão profissional.</label>
                 </div>
-                <div class="form-group">
-                    <label for="gravacao">Responsável pela Gravação</label>
-                    <input type="text" id="gravacao" required>
+            </section>
+
+            <!-- AÇÕES DE EXPORTAÇÃO DE ROTEIRO -->
+            <div class="export-actions no-print">
+                <h3>📥 Exportar Roteiro Concluído</h3>
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;">Baixe seu roteiro preenchido nos formatos oficiais para entrega acadêmica e corporativa:</p>
+                <div class="export-buttons">
+                    <button type="button" class="btn btn-primary" onclick="exportDocx()">📄 Baixar Word (.docx)</button>
+                    <button type="button" class="btn btn-success" onclick="exportDoc()">📝 Baixar DOC (.doc)</button>
+                    <button type="button" class="btn btn-warning" onclick="exportTxt()">📄 Baixar TXT (.txt)</button>
+                    <button type="button" class="btn btn-primary" style="background:#475569;" onclick="window.print()">🖨️ Salvar em PDF</button>
                 </div>
-                <div class="form-group">
-                    <label for="editor">Responsável pela Edição</label>
-                    <input type="text" id="editor" required>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="tituloSpotify">Título para Publicação no Spotify</label>
-                <input type="text" id="tituloSpotify" placeholder="Título chamativo e profissional" required>
-            </div>
-
-            <div class="form-group">
-                <label for="textoSpotify">Texto de Apresentação (Sinopse para o Spotify)</label>
-                <textarea id="textoSpotify" placeholder="Escreva um breve texto apresentando o tema, despertando o interesse e resumindo a discussão..." required></textarea>
-            </div>
-        </section>
-
-        <!-- 2. INFORMAÇÕES DE DESENVOLVIMENTO -->
-        <section>
-            <h2>2. Informações de Desenvolvimento</h2>
-            <div class="form-group">
-                <label for="introducao">1. Introdução do Tema (Abertura e Contextualização)</label>
-                <textarea id="introducao" placeholder="Como será a vinheta/fala inicial para captar a atenção do ouvinte..." required></textarea>
-            </div>
-
-            <div class="form-group">
-                <label for="perguntasNorteadoras">2. Perguntas Norteadoras e Argumentação</label>
-                <textarea id="perguntasNorteadoras" placeholder="Selecione as perguntas relevantes, estruture as respostas com argumentos, dados e exemplos..." required></textarea>
-            </div>
-
-            <div class="form-group">
-                <label for="dadosExternos">3. Dados, Estatísticas e Fontes Externas (Legislação, Notícias, Pesquisas)</label>
-                <textarea id="dadosExternos" placeholder="Indique dados, estatísticas, leis (ex: CLT, Código Penal) e os respetivos links das fontes..." required></textarea>
-            </div>
-
-            <div class="form-group">
-                <label for="aprendizadoProposto">4. Aprendizado Proposto e Relação com a Área Corporativa(cite as fontes usadas)</label>
-                <textarea id="aprendizadoProposto" placeholder="Relacione o tema com Endomarketing, Comunicação Corporativa e RH. Apresente exemplos práticos." required></textarea>
-            </div>
-
-            <div class="form-group">
-                <label for="conclusaoEpisodio">5. Conclusão, Reflexão e Despedida</label>
-                <textarea id="conclusaoEpisodio" placeholder="Síntese dos aprendizados, mensagem final, chamada para o próximo episódio e agradecimentos..." required></textarea>
-            </div>
-        </section>
-
-        <!-- 3. DESAFIO ESPECIAL — E SE O RH FOSSE VOCÊ? -->
-        <section style="border-left: 4px solid var(--accent);">
-            <h2>3. Desafio Especial — E se o RH fosse você?</h2>
-            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 12px;">Apresentem uma situação-problema ética/organizacional responsável e fundamentem as ações necessárias.</p>
-            
-            <div class="form-group">
-                <label for="problemaIdentificado">1. Qual é o problema identificado?</label>
-                <textarea id="problemaIdentificado" required></textarea>
-            </div>
-            <div class="form-group">
-                <label for="direitosViolados">2. Quais direitos podem estar sendo violados ou o que seria um destaque desse tema?</label>
-                <textarea id="direitosViolados" required></textarea>
-            </div>
-            <div class="form-group">
-                <label for="primeiraAtitude">3. Qual deve ser a primeira atitude do RH?</label>
-                <textarea id="primeiraAtitude" required></textarea>
-            </div>
-            <div class="form-group">
-                <label for="protecaoEnvolvidos">4. Como proteger as pessoas envolvidas nesse assunto? Ou como manter um bom clima na empresa com esse assunto?</label>
-                <textarea id="protecaoEnvolvidos" required></textarea>
-            </div>
-            <div class="form-group">
-                <label for="medidasOrganizacionais">5. Quais medidas devem ser tomadas pela organização?</label>
-                <textarea id="medidasOrganizacionais" required></textarea>
-            </div>
-        </section>
-
-        <!-- 4. CRITÉRIOS DE QUALIDADE & CHECKLIST -->
-        <section class="no-print">
-            <h2>4. Check de Critérios de Produção e Qualidade</h2>
-            <div class="checklist">
-                <label class="checklist-item"><input type="checkbox" required> Todos os integrantes participaram da produção.</label>
-                <label class="checklist-item"><input type="checkbox" required> Roteiro preenchido integralmente.</label>
-                <label class="checklist-item"><input type="checkbox" required> Conceitos pesquisados e corretos.</label>
-                <label class="checklist-item"><input type="checkbox" required> Perguntas norteadoras respondidas.</label>
-                <label class="checklist-item"><input type="checkbox" required> Pelo menos um caso real contextualizado.</label>
-                <label class="checklist-item"><input type="checkbox" required> Fontes e links identificados.</label>
-                <label class="checklist-item"><input type="checkbox" required> Relacionado a Endomarketing, RH e Comunicação.</label>
-                <label class="checklist-item"><input type="checkbox" required> Situação-problema debatida com ética.</label>
-                <label class="checklist-item"><input type="checkbox" required> Áudio legível no tempo (5 a 8 minutos).</label>
-                <label class="checklist-item"><input type="checkbox" required> Conclusão com reflexão profissional.</label>
-            </div>
-        </section>
-
-        <!-- 5. ESTÚDIO DE GRAVAÇÃO E ÁUDIO -->
-        <section class="no-print">
-            <h2>🎙️ Estúdio de Gravação e Player de Áudio</h2>
-            <div class="audio-box">
-                <div class="timer" id="timerDisplay">00:00</div>
-                <div class="controls">
-                    <button type="button" id="btnStartRecord" class="btn btn-primary">🔴 Iniciar Gravação</button>
-                    <button type="button" id="btnStopRecord" class="btn btn-danger" disabled>⏹️ Parar Gravação</button>
-                </div>
-                <audio id="audioPreview" controls style="display:none; width: 100%; margin-top: 10px;"></audio>
-                <div style="margin-top: 12px;" id="audioDownloadContainer"></div>
-            </div>
-        </section>
-
-        <!-- 6. AÇÕES DE EXPORTAÇÃO DE ROTEIRO -->
-        <div class="export-actions no-print">
-            <h3>📥 Exportar Roteiro Concluído</h3>
-            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;">Baixe seu roteiro preenchido nos formatos oficiais para entrega acadêmica e corporativa:</p>
-            <div class="export-buttons">
-                <button type="button" class="btn btn-primary" onclick="exportDocx()">📄 Baixar Word (.docx)</button>
-                <button type="button" class="btn btn-success" onclick="exportDoc()">📝 Baixar DOC (.doc)</button>
-                <button type="button" class="btn btn-warning" onclick="exportTxt()">📄 Baixar TXT (.txt)</button>
-                <button type="button" class="btn btn-primary" style="background:#475569;" onclick="window.print()">🖨️ Salvar em PDF</button>
             </div>
         </div>
+
+        <!-- ABA 2: ESTÚDIO DE GRAVAÇÃO -->
+        <div id="estudioTab" class="tab-content">
+            <section>
+                <h2>🎙️ Estúdio de Gravação de Áudio</h2>
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px;">
+                    Grave o áudio do seu episódio diretamente pelo navegador. Você pode ouvir o resultado quantas vezes quiser antes de fazer o download do arquivo final.
+                </p>
+                <div class="audio-box">
+                    <div class="timer" id="timerDisplay">00:00</div>
+                    <div class="controls">
+                        <button type="button" id="btnStartRecord" class="btn btn-primary">🔴 Iniciar Gravação</button>
+                        <button type="button" id="btnStopRecord" class="btn btn-danger" disabled>⏹️ Parar Gravação</button>
+                    </div>
+
+                    <div id="playbackContainer" style="display:none; margin-top: 20px;">
+                        <h4 style="color: var(--primary); margin-bottom: 8px;">▶️ Ouça sua Gravação:</h4>
+                        <audio id="audioPreview" controls style="width: 100%; margin-bottom: 15px;"></audio>
+                        <div>
+                            <a id="downloadAudioBtn" class="btn btn-success" style="text-decoration:none;">
+                                📥 Baixar Áudio Gravado (.mp3 / .webm)
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
     </form>
 </div>
 
 <script>
-    // Configura a data padrão como a atual
-    document.getElementById('data').valueAsDate = new Date();
+    // Gerenciamento de Abas
+    function switchTab(tabId, btn) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        btn.classList.add('active');
+    }
+
+    // --- SALVAMENTO AUTOMÁTICO NO LOCALSTORAGE ---
+    const formFields = [
+        'data', 'numEpisodio', 'turma', 'tema', 'integrantes', 'coordenador', 
+        'apresentador', 'coapresentadores', 'pesquisadores', 'roteirista', 
+        'gravacao', 'editor', 'tituloSpotify', 'textoSpotify', 'introducao', 
+        'perguntasNorteadoras', 'dadosExternos', 'aprendizadoProposto', 
+        'conclusaoEpisodio', 'problemaIdentificado', 'direitosViolados', 
+        'primeiraAtitude', 'protecaoEnvolvidos', 'medidasOrganizacionais'
+    ];
+
+    function saveToStorage() {
+        const data = {};
+        formFields.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) data[id] = el.value;
+        });
+        localStorage.setItem('rh_em_voz_dados', JSON.stringify(data));
+        
+        const status = document.getElementById('saveStatus');
+        status.textContent = '💾 Salvo automaticamente';
+        setTimeout(() => { status.textContent = '💾 Alterações salvas automaticamente'; }, 2000);
+    }
+
+    function loadFromStorage() {
+        const saved = localStorage.getItem('rh_em_voz_dados');
+        if (saved) {
+            const data = JSON.parse(saved);
+            formFields.forEach(id => {
+                if (data[id] !== undefined && document.getElementById(id)) {
+                    document.getElementById(id).value = data[id];
+                }
+            });
+        } else {
+            document.getElementById('data').valueAsDate = new Date();
+        }
+    }
+
+    // Adiciona o ouvinte de salvamento automático em cada campo
+    formFields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', saveToStorage);
+        }
+    });
+
+    window.addEventListener('DOMContentLoaded', loadFromStorage);
 
     /* --- LÓGICA DE GRAVAÇÃO DE ÁUDIO --- */
     let mediaRecorder;
@@ -285,7 +372,8 @@
     const btnStart = document.getElementById('btnStartRecord');
     const btnStop = document.getElementById('btnStopRecord');
     const audioPreview = document.getElementById('audioPreview');
-    const audioDownloadContainer = document.getElementById('audioDownloadContainer');
+    const playbackContainer = document.getElementById('playbackContainer');
+    const downloadAudioBtn = document.getElementById('downloadAudioBtn');
 
     btnStart.addEventListener('click', async () => {
         try {
@@ -299,18 +387,17 @@
                 const audioUrl = URL.createObjectURL(audioBlob);
                 
                 audioPreview.src = audioUrl;
-                audioPreview.style.display = 'block';
+                playbackContainer.style.display = 'block';
 
-                audioDownloadContainer.innerHTML = `
-                    <a href="${audioUrl}" download="RH-em-Voz-Episodio-${document.getElementById('numEpisodio').value || '01'}.mp3" class="btn btn-success" style="text-decoration:none;">
-                        📥 Baixar Gravacao (.mp3 / .webm)
-                    </a>
-                `;
+                const epNum = document.getElementById('numEpisodio').value || '01';
+                downloadAudioBtn.href = audioUrl;
+                downloadAudioBtn.download = `RH-em-Voz-Episodio-${epNum}.webm`;
             };
 
             mediaRecorder.start();
             btnStart.disabled = true;
             btnStop.disabled = false;
+            playbackContainer.style.display = 'none';
 
             secondsElapsed = 0;
             timerInterval = setInterval(() => {
@@ -321,7 +408,7 @@
             }, 1000);
 
         } catch (err) {
-            alert('Não foi possível acessar o microfone. Verifique as permissões.');
+            alert('Não foi possível acessar o microfone. Verifique as permissões do navegador.');
             console.error(err);
         }
     });
@@ -334,34 +421,13 @@
         btnStop.disabled = true;
     });
 
-    /* --- EXTRAÇÃO DOS DADOS DO FORMULÁRIO --- */
+    /* --- EXTRATOR DE DADOS PARA EXPORTAÇÃO --- */
     function getFormData() {
-        return {
-            data: document.getElementById('data').value,
-            numEpisodio: document.getElementById('numEpisodio').value,
-            turma: document.getElementById('turma').value,
-            tema: document.getElementById('tema').value,
-            integrantes: document.getElementById('integrantes').value,
-            coordenador: document.getElementById('coordenador').value,
-            apresentador: document.getElementById('apresentador').value,
-            coapresentadores: document.getElementById('coapresentadores').value,
-            pesquisadores: document.getElementById('pesquisadores').value,
-            roteirista: document.getElementById('roteirista').value,
-            gravacao: document.getElementById('gravacao').value,
-            editor: document.getElementById('editor').value,
-            tituloSpotify: document.getElementById('tituloSpotify').value,
-            textoSpotify: document.getElementById('textoSpotify').value,
-            introducao: document.getElementById('introducao').value,
-            perguntasNorteadoras: document.getElementById('perguntasNorteadoras').value,
-            dadosExternos: document.getElementById('dadosExternos').value,
-            aprendizadoProposto: document.getElementById('aprendizadoProposto').value,
-            conclusaoEpisodio: document.getElementById('conclusaoEpisodio').value,
-            problemaIdentificado: document.getElementById('problemaIdentificado').value,
-            direitosViolados: document.getElementById('direitosViolados').value,
-            primeiraAtitude: document.getElementById('primeiraAtitude').value,
-            protecaoEnvolvidos: document.getElementById('protecaoEnvolvidos').value,
-            medidasOrganizacionais: document.getElementById('medidasOrganizacionais').value
-        };
+        const d = {};
+        formFields.forEach(id => {
+            d[id] = document.getElementById(id) ? document.getElementById(id).value : '';
+        });
+        return d;
     }
 
     /* --- EXPORTAÇÃO PARA TXT --- */
@@ -377,7 +443,7 @@
         content += `Apresentador(a): ${d.apresentador} | Coapresentadores: ${d.coapresentadores}\n`;
         content += `Pesquisa: ${d.pesquisadores} | Roteiro: ${d.roteirista}\n`;
         content += `Gravação: ${d.gravacao} | Edição: ${d.editor}\n\n`;
-        content += `PUBLICACÃO SPOTIFY\n`;
+        content += `PUBLICAÇÃO SPOTIFY\n`;
         content += `Título: ${d.tituloSpotify}\n`;
         content += `Sinopse: ${d.textoSpotify}\n\n`;
         content += `2. DESENVOLVIMENTO DO EPISÓDIO\n`;
