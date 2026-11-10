@@ -30,12 +30,12 @@
         header h1 { font-size: 2rem; color: var(--primary); display: flex; align-items: center; gap: 10px; }
         .badge { background: var(--primary-light); color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
 
-        /* TELA INICIAL (DOIS BOTÕES) */
+        /* TELA INICIAL (TRÊS BOTÕES) */
         #homeScreen { text-align: center; padding: 50px 20px; }
         #homeScreen h2 { color: var(--primary); font-size: 2rem; margin-bottom: 12px; }
         #homeScreen p { color: var(--text-muted); font-size: 1.1rem; margin-bottom: 40px; }
-        .home-buttons { display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; }
-        .big-btn { background: var(--primary); color: white; border: none; padding: 22px 36px; font-size: 1.25rem; font-weight: 600; border-radius: 12px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 12px; }
+        .home-buttons { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+        .big-btn { background: var(--primary); color: white; border: none; padding: 20px 30px; font-size: 1.15rem; font-weight: 600; border-radius: 12px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 10px; }
         .big-btn:hover { background: var(--primary-light); transform: translateY(-2px); }
 
         /* Módulos de Conteúdo */
@@ -62,16 +62,24 @@
         /* Estúdio de Gravação Direta */
         .audio-box { background: #f0fdf4; padding: 40px; border-radius: 8px; border: 2px dashed var(--primary-light); text-align: center; }
         .timer { font-size: 3rem; font-weight: bold; font-family: monospace; color: var(--primary); margin: 20px 0; }
-        .controls { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+        .controls { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
         
         .btn { padding: 12px 22px; font-size: 1rem; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-primary:hover { background: var(--primary-light); }
+        .btn-warning { background: #d97706; color: white; }
+        .btn-warning:hover { background: #b45309; }
         .btn-danger { background: #b91c1c; color: white; }
         .btn-danger:hover { background: #991b1b; }
         .btn-success { background: #047857; color: white; }
         .btn-success:hover { background: #065f46; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Roteiro de Falas Dinâmico */
+        .fala-card { background: #f8fafc; border: 1px solid var(--border); padding: 16px; border-radius: 8px; margin-bottom: 12px; position: relative; }
+        .fala-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .btn-remove { background: #ef4444; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+        .btn-remove:hover { background: #dc2626; }
 
         /* Checklist */
         .checklist { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -101,13 +109,16 @@
         <span id="saveStatus">💾 Salvo automaticamente</span>
     </header>
 
-    <!-- TELA INICIAL COM DOIS BOTÕES -->
+    <!-- TELA INICIAL COM TRÊS BOTÕES -->
     <div id="homeScreen" class="module-view active">
         <h2>Projeto RH em Voz</h2>
         <p>Selecione abaixo a ferramenta desejada para iniciar:</p>
         <div class="home-buttons">
             <button class="big-btn" onclick="switchModule('roteiroModule')">
                 📝 Gerar Roteiro
+            </button>
+            <button class="big-btn" onclick="switchModule('falasModule')">
+                🗣️ Roteiro de Falas
             </button>
             <button class="big-btn" onclick="switchModule('estudioModule')">
                 🎙️ Gerar Áudio Podcast
@@ -277,21 +288,61 @@
         </form>
     </div>
 
-    <!-- MÓDULO 2: ESTÚDIO DE GRAVAÇÃO DIRETA -->
+    <!-- MÓDULO 2: ROTEIRO DE FALAS (SCRIPT INTERATIVO) -->
+    <div id="falasModule" class="module-view">
+        <div class="back-bar no-print">
+            <button class="btn btn-primary" onclick="goHome()">⬅️ Voltar ao Início</button>
+        </div>
+
+        <section>
+            <h2>🗣️ Organização do Roteiro de Falas por Participante</h2>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px;">
+                Adicione os nomes dos apresentadores e coapresentadores e crie as falas do episódio na ordem exata em que serão gravadas.
+            </p>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label for="listaApresentadores">Nome do(a) Apresentador(a)</label>
+                    <input type="text" id="listaApresentadores" placeholder="Ex: Ana Souza">
+                </div>
+                <div class="form-group">
+                    <label for="listaCoapresentadores">Nomes dos(as) Coapresentadores(as)</label>
+                    <input type="text" id="listaCoapresentadores" placeholder="Ex: Carlos, Mariana">
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>💬 Sequência de Falas do Episódio</h2>
+            <div id="containerFalas"></div>
+            <button type="button" class="btn btn-primary" onclick="adicionarFala()" style="margin-top: 10px;">➕ Adicionar Nova Fala</button>
+        </section>
+
+        <div class="export-actions no-print">
+            <h3>📥 Exportar Roteiro de Falas Organizado</h3>
+            <div class="export-buttons">
+                <button type="button" class="btn btn-primary" onclick="exportFalasDocx()">📄 Baixar Word (.docx)</button>
+                <button type="button" class="btn " style="background:#111827; color:#fff;" onclick="window.print()">🖨️ Salvar em PDF / Imprimir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÓDULO 3: ESTÚDIO DE GRAVAÇÃO (COM PAUSAR / RETOMAR) -->
     <div id="estudioModule" class="module-view">
         <div class="back-bar no-print">
             <button class="btn btn-primary" onclick="goHome()">⬅️ Voltar ao Início</button>
         </div>
 
         <section>
-            <h2>🎙️ Estúdio de Gravação Direta (MP3 / WebM)</h2>
+            <h2>🎙️ Estúdio de Gravação (MP3 / WebM)</h2>
             <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px;">
-                Grave o seu episódio diretamente e obtenha o arquivo de áudio pronto para download imediato.
+                Grave seu episódio. Você pode pausar e retomar a gravação a qualquer momento antes de finalizar e baixar o arquivo.
             </p>
             <div class="audio-box">
                 <div class="timer" id="timerDisplay">00:00</div>
                 <div class="controls">
                     <button type="button" id="btnStartRecord" class="btn btn-primary">🔴 Iniciar Gravação</button>
+                    <button type="button" id="btnPauseRecord" class="btn btn-warning" disabled>⏸️ Pausar</button>
                     <button type="button" id="btnStopRecord" class="btn btn-danger" disabled>⏹️ Parar e Baixar MP3</button>
                 </div>
                 <div id="downloadArea" style="margin-top: 20px;"></div>
@@ -319,7 +370,8 @@
         'gravacao', 'editor', 'tituloSpotify', 'textoSpotify', 'introducao', 
         'perguntasNorteadoras', 'dadosExternos', 'aprendizadoProposto', 
         'conclusaoEpisodio', 'problemaIdentificado', 'direitosViolados', 
-        'primeiraAtitude', 'protecaoEnvolvidos', 'medidasOrganizacionais'
+        'primeiraAtitude', 'protecaoEnvolvidos', 'medidasOrganizacionais',
+        'listaApresentadores', 'listaCoapresentadores'
     ];
 
     function saveToStorage() {
@@ -328,6 +380,16 @@
             const el = document.getElementById(id);
             if (el) data[id] = el.value;
         });
+
+        const falas = [];
+        document.querySelectorAll('.fala-card').forEach(card => {
+            falas.push({
+                personagem: card.querySelector('.fala-personagem').value,
+                texto: card.querySelector('.fala-texto').value
+            });
+        });
+        data['falasDinamicas'] = falas;
+
         localStorage.setItem('rh_em_voz_dados', JSON.stringify(data));
         
         const status = document.getElementById('saveStatus');
@@ -346,9 +408,16 @@
                     document.getElementById(id).value = data[id];
                 }
             });
+
+            if (data['falasDinamicas'] && data['falasDinamicas'].length > 0) {
+                data['falasDinamicas'].forEach(f => adicionarFala(f.personagem, f.texto));
+            } else {
+                adicionarFala();
+            }
         } else {
             const dataField = document.getElementById('data');
             if(dataField) dataField.valueAsDate = new Date();
+            adicionarFala();
         }
     }
 
@@ -359,7 +428,22 @@
 
     window.addEventListener('DOMContentLoaded', loadFromStorage);
 
-    /* --- GRAVAÇÃO DIRETA E DOWNLOAD AUTOMÁTICO DE ÁUDIO --- */
+    /* --- GESTÃO DE FALAS DINÂMICAS --- */
+    function adicionarFala(personagem = '', texto = '') {
+        const container = document.getElementById('containerFalas');
+        const card = document.createElement('div');
+        card.className = 'fala-card';
+        card.innerHTML = `
+            <div class="fala-header">
+                <input type="text" class="fala-personagem" placeholder="Quem vai falar? (Ex: Apresentador Ana)" value="${personagem}" style="width: 75%;" oninput="saveToStorage()">
+                <button type="button" class="btn-remove" onclick="this.closest('.fala-card').remove(); saveToStorage();">Excluir</button>
+            </div>
+            <textarea class="fala-texto" placeholder="Digite o texto da fala aqui..." oninput="saveToStorage()">${texto}</textarea>
+        `;
+        container.appendChild(card);
+    }
+
+    /* --- GRAVAÇÃO COM SUPORTE A PAUSAR E RETOMAR --- */
     let mediaRecorder;
     let audioChunks = [];
     let timerInterval;
@@ -367,6 +451,7 @@
 
     const timerDisplay = document.getElementById('timerDisplay');
     const btnStart = document.getElementById('btnStartRecord');
+    const btnPause = document.getElementById('btnPauseRecord');
     const btnStop = document.getElementById('btnStopRecord');
     const downloadArea = document.getElementById('downloadArea');
 
@@ -383,7 +468,6 @@
             mediaRecorder.onstop = () => {
                 const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
                 const audioUrl = URL.createObjectURL(audioBlob);
-                
                 const epNum = document.getElementById('numEpisodio').value || '01';
                 
                 downloadArea.innerHTML = `
@@ -395,6 +479,8 @@
 
             mediaRecorder.start();
             btnStart.disabled = true;
+            btnPause.disabled = false;
+            btnPause.textContent = "⏸️ Pausar";
             btnStop.disabled = false;
             downloadArea.innerHTML = '';
 
@@ -412,6 +498,23 @@
         }
     });
 
+    btnPause.addEventListener('click', () => {
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+            mediaRecorder.pause();
+            clearInterval(timerInterval);
+            btnPause.textContent = "▶️ Retomar";
+        } else if (mediaRecorder && mediaRecorder.state === 'paused') {
+            mediaRecorder.resume();
+            btnPause.textContent = "⏸️ Pausar";
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                let m = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
+                let s = (secondsElapsed % 60).toString().padStart(2, '0');
+                timerDisplay.textContent = `${m}:${s}`;
+            }, 1000);
+        }
+    });
+
     btnStop.addEventListener('click', () => {
         if (mediaRecorder && mediaRecorder.state !== 'inactive') {
             mediaRecorder.stop();
@@ -419,6 +522,8 @@
         }
         clearInterval(timerInterval);
         btnStart.disabled = false;
+        btnPause.disabled = true;
+        btnPause.textContent = "⏸️ Pausar";
         btnStop.disabled = true;
     });
 
@@ -448,10 +553,10 @@
         const html = `<html><head><meta charset='utf-8'><style>body{color:#111827;font-family:Arial;} h2{color:#064e3b;border-bottom:2px solid #059669;padding-bottom:5px;}</style></head><body>
             <h2 style="color:#064e3b;">ROTEIRO OFICIAL - PODCAST RH EM VOZ</h2>
             <p><b>Tema:</b> ${d.tema}</p><p><b>Integrantes:</b> ${d.integrantes}</p>
-            <h3 style="color:#059669;">1. Identificação</h3>
+            <h3 style="color:#064e3b;">1. Identificação</h3>
             <p><b>Data:</b> ${d.data} | <b>Episódio:</b> ${d.numEpisodio} | <b>Turma:</b> ${d.turma}</p>
             <p><b>Apresentador:</b> ${d.apresentador}</p>
-            <h3 style="color:#059669;">2. Desenvolvimento</h3>
+            <h3 style="color:#064e3b;">2. Desenvolvimento</h3>
             <p><b>Introdução:</b> ${d.introducao}</p>
             <p><b>Perguntas Norteadoras:</b> ${d.perguntasNorteadoras}</p>
             <p><b>Conclusão:</b> ${d.conclusaoEpisodio}</p>
@@ -480,6 +585,32 @@
         });
         Packer.toBlob(doc).then(blob => {
             saveAs(blob, `Roteiro_RH_em_Voz_Ep_${d.numEpisodio || '01'}.docx`);
+        });
+    }
+
+    function exportFalasDocx() {
+        const { Document, Packer, Paragraph, TextRun, HeadingLevel } = window.docx;
+        const apresentador = document.getElementById('listaApresentadores').value || 'Não informado';
+        const coapresentadores = document.getElementById('listaCoapresentadores').value || 'Não informado';
+
+        const children = [
+            new Paragraph({ text: "ROTEIRO DE FALAS - PODCAST RH EM VOZ", heading: HeadingLevel.HEADING_1 }),
+            new Paragraph({ children: [new TextRun({ text: `Apresentador(a): ${apresentador}`, bold: true, color: "064E3B" })] }),
+            new Paragraph({ children: [new TextRun({ text: `Coapresentador(a)es: ${coapresentadores}`, color: "111827" })] }),
+            new Paragraph({ text: "" }),
+            new Paragraph({ text: "SEQUÊNCIA DE FALAS PARA GRAVAÇÃO", heading: HeadingLevel.HEADING_2 })
+        ];
+
+        document.querySelectorAll('.fala-card').forEach((card, index) => {
+            const p = card.querySelector('.fala-personagem').value || `Participante ${index + 1}`;
+            const t = card.querySelector('.fala-texto').value || '(Sem texto preenchido)';
+            children.push(new Paragraph({ children: [new TextRun({ text: `${p}: `, bold: true, color: "059669" }), new TextRun({ text: t })] }));
+            children.push(new Paragraph({ text: "" }));
+        });
+
+        const doc = new Document({ sections: [{ children }] });
+        Packer.toBlob(doc).then(blob => {
+            saveAs(blob, `Roteiro_de_Falas_RH_em_Voz.docx`);
         });
     }
 </script>
