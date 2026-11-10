@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RH em Voz - Gerador de Roteiro e Estúdio de Gravação</title>
+    <title>RH em Voz - Plataforma de Podcast</title>
     
     <!-- Bibliotecas externas para exportação em DOCX -->
     <script src="https://unpkg.com/docx@7.8.2/build/index.js"></script>
@@ -20,26 +20,33 @@
             --text: #0f172a;
             --text-muted: #475569;
             --border: #cbd5e1;
-            --radius: 10px;
+            --radius: 12px;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: var(--bg); color: var(--text); padding: 24px; line-height: 1.6; }
         .wrapper { max-width: 960px; margin: 0 auto; background: var(--card-bg); padding: 36px; border-radius: var(--radius); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); border: 1px solid var(--border); }
         
-        header { border-bottom: 3px solid var(--primary); padding-bottom: 16px; margin-bottom: 24px; }
-        header h1 { font-size: 2.2rem; color: var(--primary); display: flex; align-items: center; gap: 10px; }
-        header p { color: var(--text-muted); font-size: 1.05rem; }
+        header { border-bottom: 3px solid var(--primary); padding-bottom: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        header h1 { font-size: 2rem; color: var(--primary); display: flex; align-items: center; gap: 10px; }
         .badge { background: var(--secondary); color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
 
-        /* Abas de Navegação */
-        .tabs { display: flex; gap: 10px; margin-bottom: 24px; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
-        .tab-btn { background: #e2e8f0; border: none; padding: 10px 20px; font-weight: 600; font-size: 1rem; border-radius: 6px; cursor: pointer; color: var(--text-muted); transition: 0.2s; }
-        .tab-btn.active { background: var(--primary); color: white; }
-        
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        /* TELA INICIAL (DOIS BOTÕES) */
+        #homeScreen { text-align: center; padding: 40px 20px; }
+        #homeScreen h2 { color: var(--primary); font-size: 1.8rem; margin-bottom: 10px; }
+        #homeScreen p { color: var(--text-muted); font-size: 1.1rem; margin-bottom: 30px; }
+        .home-buttons { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+        .big-btn { background: var(--primary); color: white; border: none; padding: 20px 32px; font-size: 1.2rem; font-weight: 600; border-radius: 12px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 12px; }
+        .big-btn:hover { background: var(--primary-light); transform: translateY(-2px); }
+        .big-btn.audio-btn { background: var(--secondary); }
+        .big-btn.audio-btn:hover { background: #0d9488; }
 
+        /* Módulos de Conteúdo */
+        .module-view { display: none; }
+        .module-view.active { display: block; }
+
+        .back-bar { margin-bottom: 20px; }
+        
         section { margin-bottom: 32px; background: #fff; padding: 20px; border: 1px solid var(--border); border-radius: 8px; }
         section h2 { font-size: 1.25rem; color: var(--primary); border-bottom: 2px solid var(--bg); padding-bottom: 8px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
 
@@ -75,19 +82,16 @@
         .checklist-item { display: flex; align-items: flex-start; gap: 8px; font-size: 0.9rem; }
         .checklist-item input { margin-top: 4px; }
 
-        /* Ações e Exportação */
         .export-actions { background: #e0e7ff; padding: 20px; border-radius: 8px; text-align: center; margin-top: 20px; }
         .export-actions h3 { color: var(--primary); margin-bottom: 12px; }
         .export-buttons { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
 
-        /* Salvo feedback */
-        #saveStatus { font-size: 0.85rem; color: #16a34a; font-weight: 600; float: right; margin-top: 5px; }
+        #saveStatus { font-size: 0.85rem; color: #16a34a; font-weight: 600; }
 
         @media print {
             body { padding: 0; background: #fff; }
             .wrapper { box-shadow: none; border: none; padding: 0; }
-            .no-print, .export-actions, .tabs, button { display: none !important; }
-            .tab-content { display: block !important; }
+            .no-print { display: none !important; }
             input, textarea, select { border: none !important; background: transparent !important; padding: 0 !important; }
             textarea { resize: none; }
         }
@@ -96,25 +100,32 @@
 <body>
 
 <div class="wrapper">
-    <header>
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-            <h1>🎙️ RH em Voz <span class="badge">Profª Bárbara</span></h1>
-            <span id="saveStatus">💾 Alterações salvas automaticamente</span>
-        </div>
-        <p>Gerador de Roteiro Oficial de Produção e Estúdio de Gravação</p>
+    <header class="no-print">
+        <h1>🎙️ RH em Voz <span class="badge">Profª Bárbara</span></h1>
+        <span id="saveStatus">💾 Salvo automaticamente</span>
     </header>
 
-    <!-- ABAS DE NAVEGAÇÃO -->
-    <div class="tabs no-print">
-        <button class="tab-btn active" onclick="switchTab('roteiroTab', this)">📝 1. Roteiro e Formulário</button>
-        <button class="tab-btn" onclick="switchTab('estudioTab', this)">🎙️ 2. Estúdio de Gravação</button>
+    <!-- TELA INICIAL COM OS DOIS BOTÕES -->
+    <div id="homeScreen" class="module-view active">
+        <h2>Bem-vindo(a) ao Projeto RH em Voz</h2>
+        <p>Escolha a opção desejada para gerenciar o roteiro ou gravar o seu episódio:</p>
+        <div class="home-buttons">
+            <button class="big-btn" onclick="switchModule('roteiroModule')">
+                📝 Gerar Roteiro
+            </button>
+            <button class="big-btn audio-btn" onclick="switchModule('estudioModule')">
+                🎙️ Gerar Áudio Podcast
+            </button>
+        </div>
     </div>
 
-    <form id="podcastForm">
-        
-        <!-- ABA 1: ROTEIRO -->
-        <div id="roteiroTab" class="tab-content active">
-            <!-- INFORMAÇÕES DE IDENTIFICAÇÃO -->
+    <!-- MÓDULO 1: ROTEIRO E FORMULÁRIO -->
+    <div id="roteiroModule" class="module-view">
+        <div class="back-bar no-print">
+            <button class="btn btn-warning" onclick="goHome()">⬅️ Voltar ao Início</button>
+        </div>
+
+        <form id="podcastForm">
             <section>
                 <h2>1. Informações de Identificação</h2>
                 <div class="grid-3">
@@ -190,7 +201,6 @@
                 </div>
             </section>
 
-            <!-- INFORMAÇÕES DE DESENVOLVIMENTO -->
             <section>
                 <h2>2. Informações de Desenvolvimento</h2>
                 <div class="form-group">
@@ -219,11 +229,8 @@
                 </div>
             </section>
 
-            <!-- DESAFIO ESPECIAL — E SE O RH FOSSE VOCÊ? -->
             <section style="border-left: 4px solid var(--accent);">
                 <h2>3. Desafio Especial — E se o RH fosse você?</h2>
-                <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 12px;">Apresentem uma situação-problema ética/organizacional responsável e fundamentem as ações necessárias.</p>
-                
                 <div class="form-group">
                     <label for="problemaIdentificado">1. Qual é o problema identificado?</label>
                     <textarea id="problemaIdentificado" required></textarea>
@@ -246,11 +253,10 @@
                 </div>
             </section>
 
-            <!-- CRITÉRIOS DE QUALIDADE & CHECKLIST -->
             <section class="no-print">
                 <h2>4. Check de Critérios de Produção e Qualidade</h2>
                 <div class="checklist">
-                    <label class="checklist-item"><input type="checkbox" required> Todos os integrantes participaram da produção.</label>
+                    <label class="checklist-item"><input type="checkbox" required> Todos os integrantes participaram.</label>
                     <label class="checklist-item"><input type="checkbox" required> Roteiro preenchido integralmente.</label>
                     <label class="checklist-item"><input type="checkbox" required> Conceitos pesquisados e corretos.</label>
                     <label class="checklist-item"><input type="checkbox" required> Perguntas norteadoras respondidas.</label>
@@ -263,10 +269,8 @@
                 </div>
             </section>
 
-            <!-- AÇÕES DE EXPORTAÇÃO DE ROTEIRO -->
             <div class="export-actions no-print">
                 <h3>📥 Exportar Roteiro Concluído</h3>
-                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;">Baixe seu roteiro preenchido nos formatos oficiais para entrega acadêmica e corporativa:</p>
                 <div class="export-buttons">
                     <button type="button" class="btn btn-primary" onclick="exportDocx()">📄 Baixar Word (.docx)</button>
                     <button type="button" class="btn btn-success" onclick="exportDoc()">📝 Baixar DOC (.doc)</button>
@@ -274,45 +278,51 @@
                     <button type="button" class="btn btn-primary" style="background:#475569;" onclick="window.print()">🖨️ Salvar em PDF</button>
                 </div>
             </div>
+        </form>
+    </div>
+
+    <!-- MÓDULO 2: ESTÚDIO DE GRAVAÇÃO DE ÁUDIO -->
+    <div id="estudioModule" class="module-view">
+        <div class="back-bar no-print">
+            <button class="btn btn-warning" onclick="goHome()">⬅️ Voltar ao Início</button>
         </div>
 
-        <!-- ABA 2: ESTÚDIO DE GRAVAÇÃO -->
-        <div id="estudioTab" class="tab-content">
-            <section>
-                <h2>🎙️ Estúdio de Gravação de Áudio</h2>
-                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px;">
-                    Grave o áudio do seu episódio diretamente pelo navegador. Você pode ouvir o resultado quantas vezes quiser antes de fazer o download do arquivo final.
-                </p>
-                <div class="audio-box">
-                    <div class="timer" id="timerDisplay">00:00</div>
-                    <div class="controls">
-                        <button type="button" id="btnStartRecord" class="btn btn-primary">🔴 Iniciar Gravação</button>
-                        <button type="button" id="btnStopRecord" class="btn btn-danger" disabled>⏹️ Parar Gravação</button>
-                    </div>
+        <section>
+            <h2>🎙️ Estúdio de Gravação e Reprodução de Áudio</h2>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px;">
+                Grave, ouça quantas vezes precisar e baixe o áudio do seu episódio em formato pronto para uso.
+            </p>
+            <div class="audio-box">
+                <div class="timer" id="timerDisplay">00:00</div>
+                <div class="controls">
+                    <button type="button" id="btnStartRecord" class="btn btn-primary">🔴 Gravar Áudio</button>
+                    <button type="button" id="btnStopRecord" class="btn btn-danger" disabled>⏹️ Parar Gravação</button>
+                </div>
 
-                    <div id="playbackContainer" style="display:none; margin-top: 20px;">
-                        <h4 style="color: var(--primary); margin-bottom: 8px;">▶️ Ouça sua Gravação:</h4>
-                        <audio id="audioPreview" controls style="width: 100%; margin-bottom: 15px;"></audio>
-                        <div>
-                            <a id="downloadAudioBtn" class="btn btn-success" style="text-decoration:none;">
-                                📥 Baixar Áudio Gravado (.mp3 / .webm)
-                            </a>
-                        </div>
+                <div id="playbackSection" style="display:none; margin-top: 20px; border-top: 1px solid var(--border); padding-top: 15px;">
+                    <h4 style="color: var(--primary); margin-bottom: 10px;">▶️ Pré-escuta do Episódio Gravado:</h4>
+                    <audio id="audioPreview" controls style="width: 100%; margin-bottom: 15px;"></audio>
+                    <div>
+                        <a id="downloadAudioBtn" class="btn btn-success" style="text-decoration:none;">
+                            📥 Baixar Áudio Gravado (MP3 / WebM)
+                        </a>
                     </div>
                 </div>
-            </section>
-        </div>
-
-    </form>
+            </div>
+        </section>
+    </div>
 </div>
 
 <script>
-    // Gerenciamento de Abas
-    function switchTab(tabId, btn) {
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
-        btn.classList.add('active');
+    // Gerenciador de Módulos (Telas)
+    function switchModule(moduleId) {
+        document.querySelectorAll('.module-view').forEach(el => el.classList.remove('active'));
+        document.getElementById(moduleId).classList.add('active');
+        window.scrollTo(0, 0);
+    }
+
+    function goHome() {
+        switchModule('homeScreen');
     }
 
     // --- SALVAMENTO AUTOMÁTICO NO LOCALSTORAGE ---
@@ -334,8 +344,10 @@
         localStorage.setItem('rh_em_voz_dados', JSON.stringify(data));
         
         const status = document.getElementById('saveStatus');
-        status.textContent = '💾 Salvo automaticamente';
-        setTimeout(() => { status.textContent = '💾 Alterações salvas automaticamente'; }, 2000);
+        if(status) {
+            status.textContent = '💾 Alterações salvas';
+            setTimeout(() => { status.textContent = '💾 Salvo automaticamente'; }, 2000);
+        }
     }
 
     function loadFromStorage() {
@@ -348,21 +360,19 @@
                 }
             });
         } else {
-            document.getElementById('data').valueAsDate = new Date();
+            const dataField = document.getElementById('data');
+            if(dataField) dataField.valueAsDate = new Date();
         }
     }
 
-    // Adiciona o ouvinte de salvamento automático em cada campo
     formFields.forEach(id => {
         const el = document.getElementById(id);
-        if (el) {
-            el.addEventListener('input', saveToStorage);
-        }
+        if (el) el.addEventListener('input', saveToStorage);
     });
 
     window.addEventListener('DOMContentLoaded', loadFromStorage);
 
-    /* --- LÓGICA DE GRAVAÇÃO DE ÁUDIO --- */
+    /* --- LÓGICA DE GRAVAÇÃO E REPRODUÇÃO ESTÁVEL --- */
     let mediaRecorder;
     let audioChunks = [];
     let timerInterval;
@@ -372,7 +382,7 @@
     const btnStart = document.getElementById('btnStartRecord');
     const btnStop = document.getElementById('btnStopRecord');
     const audioPreview = document.getElementById('audioPreview');
-    const playbackContainer = document.getElementById('playbackContainer');
+    const playbackSection = document.getElementById('playbackSection');
     const downloadAudioBtn = document.getElementById('downloadAudioBtn');
 
     btnStart.addEventListener('click', async () => {
@@ -381,13 +391,17 @@
             mediaRecorder = new MediaRecorder(stream);
             audioChunks = [];
 
-            mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+            mediaRecorder.ondataavailable = event => {
+                if (event.data.size > 0) audioChunks.push(event.data);
+            };
+
             mediaRecorder.onstop = () => {
                 const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
                 const audioUrl = URL.createObjectURL(audioBlob);
                 
                 audioPreview.src = audioUrl;
-                playbackContainer.style.display = 'block';
+                audioPreview.load();
+                playbackSection.style.display = 'block';
 
                 const epNum = document.getElementById('numEpisodio').value || '01';
                 downloadAudioBtn.href = audioUrl;
@@ -397,7 +411,7 @@
             mediaRecorder.start();
             btnStart.disabled = true;
             btnStop.disabled = false;
-            playbackContainer.style.display = 'none';
+            playbackSection.style.display = 'none';
 
             secondsElapsed = 0;
             timerInterval = setInterval(() => {
@@ -414,14 +428,16 @@
     });
 
     btnStop.addEventListener('click', () => {
-        mediaRecorder.stop();
-        mediaRecorder.stream.getTracks().forEach(track => track.stop());
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+            mediaRecorder.stream.getTracks().forEach(track => track.stop());
+        }
         clearInterval(timerInterval);
         btnStart.disabled = false;
         btnStop.disabled = true;
     });
 
-    /* --- EXTRATOR DE DADOS PARA EXPORTAÇÃO --- */
+    /* --- EXPORTADORES --- */
     function getFormData() {
         const d = {};
         formFields.forEach(id => {
@@ -430,119 +446,38 @@
         return d;
     }
 
-    /* --- EXPORTAÇÃO PARA TXT --- */
     function exportTxt() {
         const d = getFormData();
-        let content = `ROTEIRO OFICIAL DE PRODUÇÃO - PODCAST RH EM VOZ (Profª Bárbara)\n`;
-        content += `===========================================================\n\n`;
-        content += `1. INFORMAÇÕES DE IDENTIFICAÇÃO\n`;
-        content += `Data: ${d.data} | Episódio: ${d.numEpisodio} | Turma: ${d.turma}\n`;
-        content += `Tema: ${d.tema}\n`;
-        content += `Integrantes: ${d.integrantes}\n`;
-        content += `Coordenador(a): ${d.coordenador}\n`;
-        content += `Apresentador(a): ${d.apresentador} | Coapresentadores: ${d.coapresentadores}\n`;
-        content += `Pesquisa: ${d.pesquisadores} | Roteiro: ${d.roteirista}\n`;
-        content += `Gravação: ${d.gravacao} | Edição: ${d.editor}\n\n`;
-        content += `PUBLICAÇÃO SPOTIFY\n`;
-        content += `Título: ${d.tituloSpotify}\n`;
-        content += `Sinopse: ${d.textoSpotify}\n\n`;
-        content += `2. DESENVOLVIMENTO DO EPISÓDIO\n`;
-        content += `[Introdução]:\n${d.introducao}\n\n`;
-        content += `[Perguntas Norteadoras & Respostas]:\n${d.perguntasNorteadoras}\n\n`;
-        content += `[Dados Externos, Leis & Fontes]:\n${d.dadosExternos}\n\n`;
-        content += `[Aprendizado Proposto - Endomarketing/RH]:\n${d.aprendizadoProposto}\n\n`;
-        content += `[Conclusão & Despedida]:\n${d.conclusaoEpisodio}\n\n`;
-        content += `3. DESAFIO ESPECIAL - E SE O RH FOSSE VOCÊ?\n`;
-        content += `- Problema: ${d.problemaIdentificado}\n`;
-        content += `- Direitos Violados: ${d.direitosViolados}\n`;
-        content += `- Primeira Atitude do RH: ${d.primeiraAtitude}\n`;
-        content += `- Proteção dos Envolvidos: ${d.protecaoEnvolvidos}\n`;
-        content += `- Medidas Organizacionais: ${d.medidasOrganizacionais}\n`;
+        let content = `ROTEIRO OFICIAL DE PRODUÇÃO - PODCAST RH EM VOZ\n`;
+        content += `===============================================\n\n`;
+        content += `1. IDENTIFICAÇÃO\nData: ${d.data} | Episódio: ${d.numEpisodio} | Turma: ${d.turma}\nTema: ${d.tema}\nIntegrantes: ${d.integrantes}\nCoordenador(a): ${d.coordenador}\nApresentador(a): ${d.apresentador} | Coapresentadores: ${d.coapresentadores}\nPesquisa: ${d.pesquisadores} | Roteiro: ${d.roteirista}\nGravação: ${d.gravacao} | Edição: ${d.editor}\nTítulo Spotify: ${d.tituloSpotify}\nSinopse: ${d.textoSpotify}\n\n`;
+        content += `2. DESENVOLVIMENTO\nIntrodução:\n${d.introducao}\n\nPerguntas Norteadoras:\n${d.perguntasNorteadoras}\n\nDados Externos:\n${d.dadosExternos}\n\nAprendizado:\n${d.aprendizadoProposto}\n\nConclusão:\n${d.conclusaoEpisodio}\n\n`;
+        content += `3. DESAFIO ESPECIAL\nProblema: ${d.problemaIdentificado}\nDireitos: ${d.direitosViolados}\nAtitude RH: ${d.primeiraAtitude}\nProteção: ${d.protecaoEnvolvidos}\nMedidas: ${d.medidasOrganizacionais}`;
 
         const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
         saveAs(blob, `Roteiro_RH_em_Voz_Ep_${d.numEpisodio || '01'}.txt`);
     }
 
-    /* --- EXPORTAÇÃO PARA DOC (.doc nativo HTML) --- */
     function exportDoc() {
         const d = getFormData();
-        const html = `
-            <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-            <head><title>Roteiro RH em Voz</title><style>body{font-family:Arial,sans-serif;}</style></head>
-            <body>
-                <h2>ROTEIRO DE PRODUÇÃO - PODCAST RH EM VOZ</h2>
-                <hr/>
-                <h3>1. Identificação</h3>
-                <p><b>Data:</b> ${d.data} | <b>Episódio:</b> ${d.numEpisodio} | <b>Turma:</b> ${d.turma}</p>
-                <p><b>Tema:</b> ${d.tema}</p>
-                <p><b>Integrantes:</b> ${d.integrantes}</p>
-                <p><b>Apresentador:</b> ${d.apresentador} | <b>Coapresentadores:</b> ${d.coapresentadores}</p>
-                <p><b>Pesquisa:</b> ${d.pesquisadores} | <b>Roteiro:</b> ${d.roteirista} | <b>Gravação:</b> ${d.gravacao} | <b>Edição:</b> ${d.editor}</p>
-                <p><b>Título Spotify:</b> ${d.tituloSpotify}</p>
-                <p><b>Sinopse Spotify:</b> ${d.textoSpotify}</p>
-                <h3>2. Desenvolvimento</h3>
-                <p><b>Introdução:</b><br/>${d.introducao}</p>
-                <p><b>Perguntas Norteadoras:</b><br/>${d.perguntasNorteadoras}</p>
-                <p><b>Dados Externos e Fontes:</b><br/>${d.dadosExternos}</p>
-                <p><b>Aprendizado Proposto:</b><br/>${d.aprendizadoProposto}</p>
-                <p><b>Conclusão:</b><br/>${d.conclusaoEpisodio}</p>
-                <h3>3. Desafio Especial — E se o RH fosse você?</h3>
-                <p><b>Problema:</b> ${d.problemaIdentificado}</p>
-                <p><b>Direitos Violados:</b> ${d.direitosViolados}</p>
-                <p><b>Primeira Atitude do RH:</b> ${d.primeiraAtitude}</p>
-                <p><b>Proteção dos Envolvidos:</b> ${d.protecaoEnvolvidos}</p>
-                <p><b>Medidas Organizacionais:</b> ${d.medidasOrganizacionais}</p>
-            </body>
-            </html>
-        `;
-
+        const html = `<html><head><meta charset='utf-8'></head><body><h2>ROTEIRO RH EM VOZ</h2><p><b>Tema:</b> ${d.tema}</p><p><b>Integrantes:</b> ${d.integrantes}</p><p><b>Introdução:</b> ${d.introducao}</p><p><b>Desenvolvimento:</b> ${d.perguntasNorteadoras}</p><p><b>Conclusão:</b> ${d.conclusaoEpisodio}</p></body></html>`;
         const blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
         saveAs(blob, `Roteiro_RH_em_Voz_Ep_${d.numEpisodio || '01'}.doc`);
     }
 
-    /* --- EXPORTAÇÃO PARA DOCX (Biblioteca docx.js) --- */
     function exportDocx() {
         const d = getFormData();
         const { Document, Packer, Paragraph, TextRun, HeadingLevel } = window.docx;
-
         const doc = new Document({
             sections: [{
-                properties: {},
                 children: [
-                    new Paragraph({ text: "ROTEIRO OFICIAL DE PRODUÇÃO - PODCAST RH EM VOZ", heading: HeadingLevel.HEADING_1 }),
-                    new Paragraph({ children: [new TextRun({ text: `Profª Bárbara - ETEC`, bold: true, color: "1E3A8A" })] }),
-                    new Paragraph({ text: "" }),
-
-                    new Paragraph({ text: "1. INFORMAÇÕES DE IDENTIFICAÇÃO", heading: HeadingLevel.HEADING_2 }),
-                    new Paragraph({ children: [new TextRun({ text: "Data: ", bold: true }), new TextRun(d.data), new TextRun({ text: " | Episódio: ", bold: true }), new TextRun(d.numEpisodio), new TextRun({ text: " | Turma: ", bold: true }), new TextRun(d.turma)] }),
-                    new Paragraph({ children: [new TextRun({ text: "Tema Escolhido: ", bold: true }), new TextRun(d.tema)] }),
-                    new Paragraph({ children: [new TextRun({ text: "Integrantes: ", bold: true }), new TextRun(d.integrantes)] }),
-                    new Paragraph({ children: [new TextRun({ text: "Coordenador(a): ", bold: true }), new TextRun(d.coordenador)] }),
-                    new Paragraph({ children: [new TextRun({ text: "Apresentador(a): ", bold: true }), new TextRun(d.apresentador), new TextRun({ text: " | Coapresentadores: ", bold: true }), new TextRun(d.coapresentadores)] }),
-                    new Paragraph({ children: [new TextRun({ text: "Pesquisa: ", bold: true }), new TextRun(d.pesquisadores), new TextRun({ text: " | Roteiro: ", bold: true }), new TextRun(d.roteirista)] }),
-                    new Paragraph({ children: [new TextRun({ text: "Gravação: ", bold: true }), new TextRun(d.gravacao), new TextRun({ text: " | Edição: ", bold: true }), new TextRun(d.editor)] }),
-                    new Paragraph({ children: [new TextRun({ text: "Título Spotify: ", bold: true }), new TextRun(d.tituloSpotify)] }),
-                    new Paragraph({ children: [new TextRun({ text: "Sinopse Spotify: ", bold: true }), new TextRun(d.textoSpotify)] }),
-                    new Paragraph({ text: "" }),
-
-                    new Paragraph({ text: "2. INFORMAÇÕES DE DESENVOLVIMENTO", heading: HeadingLevel.HEADING_2 }),
-                    new Paragraph({ children: [new TextRun({ text: "1. Introdução: ", bold: true }), new TextRun(d.introducao)] }),
-                    new Paragraph({ children: [new TextRun({ text: "2. Perguntas Norteadoras: ", bold: true }), new TextRun(d.perguntasNorteadoras)] }),
-                    new Paragraph({ children: [new TextRun({ text: "3. Dados Externos & Fontes: ", bold: true }), new TextRun(d.dadosExternos)] }),
-                    new Paragraph({ children: [new TextRun({ text: "4. Aprendizado Proposto (RH / Endomarketing): ", bold: true }), new TextRun(d.aprendizadoProposto)] }),
-                    new Paragraph({ children: [new TextRun({ text: "5. Conclusão & Despedida: ", bold: true }), new TextRun(d.conclusaoEpisodio)] }),
-                    new Paragraph({ text: "" }),
-
-                    new Paragraph({ text: "3. DESAFIO ESPECIAL — E SE O RH FOSSE VOCÊ?", heading: HeadingLevel.HEADING_2 }),
-                    new Paragraph({ children: [new TextRun({ text: "1. Problema Identificado: ", bold: true }), new TextRun(d.problemaIdentificado)] }),
-                    new Paragraph({ children: [new TextRun({ text: "2. Direitos Violados: ", bold: true }), new TextRun(d.direitosViolados)] }),
-                    new Paragraph({ children: [new TextRun({ text: "3. Primeira Atitude do RH: ", bold: true }), new TextRun(d.primeiraAtitude)] }),
-                    new Paragraph({ children: [new TextRun({ text: "4. Proteção dos Envolvidos: ", bold: true }), new TextRun(d.protecaoEnvolvidos)] }),
-                    new Paragraph({ children: [new TextRun({ text: "5. Medidas Organizacionais: ", bold: true }), new TextRun(d.medidasOrganizacionais)] })
+                    new Paragraph({ text: "ROTEIRO OFICIAL - PODCAST RH EM VOZ", heading: HeadingLevel.HEADING_1 }),
+                    new Paragraph({ children: [new TextRun({ text: `Tema: ${d.tema}`, bold: true })] }),
+                    new Paragraph({ children: [new TextRun({ text: `Integrantes: ${d.integrantes}` })] }),
+                    new Paragraph({ children: [new TextRun({ text: `Introdução: ${d.introducao}` })] })
                 ]
             }]
         });
-
         Packer.toBlob(doc).then(blob => {
             saveAs(blob, `Roteiro_RH_em_Voz_Ep_${d.numEpisodio || '01'}.docx`);
         });
