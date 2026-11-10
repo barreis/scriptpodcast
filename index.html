@@ -3,23 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RH em Voz - Plataforma de Podcast</title>
+    <title>RH em Voz - Plataforma Oficial</title>
     
-    <!-- Bibliotecas externas para exportação em DOCX -->
+    <!-- Bibliotecas para exportação DOCX -->
     <script src="https://unpkg.com/docx@7.8.2/build/index.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
     <style>
         :root {
-            --primary: #1e3a8a;
-            --primary-light: #2563eb;
-            --secondary: #0f766e;
-            --accent: #d97706;
+            --primary: #064e3b; /* Verde corporativo escuro */
+            --primary-light: #059669; /* Verde intermediário */
+            --accent: #047857;
             --bg: #f8fafc;
             --card-bg: #ffffff;
-            --text: #0f172a;
-            --text-muted: #475569;
-            --border: #cbd5e1;
+            --text: #111827; /* Preto corporativo */
+            --text-muted: #4b5563;
+            --border: #d1d5db;
             --radius: 12px;
         }
 
@@ -29,17 +28,15 @@
         
         header { border-bottom: 3px solid var(--primary); padding-bottom: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
         header h1 { font-size: 2rem; color: var(--primary); display: flex; align-items: center; gap: 10px; }
-        .badge { background: var(--secondary); color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+        .badge { background: var(--primary-light); color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
 
         /* TELA INICIAL (DOIS BOTÕES) */
-        #homeScreen { text-align: center; padding: 40px 20px; }
-        #homeScreen h2 { color: var(--primary); font-size: 1.8rem; margin-bottom: 10px; }
-        #homeScreen p { color: var(--text-muted); font-size: 1.1rem; margin-bottom: 30px; }
-        .home-buttons { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
-        .big-btn { background: var(--primary); color: white; border: none; padding: 20px 32px; font-size: 1.2rem; font-weight: 600; border-radius: 12px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 12px; }
+        #homeScreen { text-align: center; padding: 50px 20px; }
+        #homeScreen h2 { color: var(--primary); font-size: 2rem; margin-bottom: 12px; }
+        #homeScreen p { color: var(--text-muted); font-size: 1.1rem; margin-bottom: 40px; }
+        .home-buttons { display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; }
+        .big-btn { background: var(--primary); color: white; border: none; padding: 22px 36px; font-size: 1.25rem; font-weight: 600; border-radius: 12px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 12px; }
         .big-btn:hover { background: var(--primary-light); transform: translateY(-2px); }
-        .big-btn.audio-btn { background: var(--secondary); }
-        .big-btn.audio-btn:hover { background: #0d9488; }
 
         /* Módulos de Conteúdo */
         .module-view { display: none; }
@@ -48,7 +45,7 @@
         .back-bar { margin-bottom: 20px; }
         
         section { margin-bottom: 32px; background: #fff; padding: 20px; border: 1px solid var(--border); border-radius: 8px; }
-        section h2 { font-size: 1.25rem; color: var(--primary); border-bottom: 2px solid var(--bg); padding-bottom: 8px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        section h2 { font-size: 1.25rem; color: var(--primary); border-bottom: 2px solid #ecfdf5; padding-bottom: 8px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
 
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
@@ -59,40 +56,39 @@
         input[type="text"], input[type="number"], input[type="date"], textarea, select {
             width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem; outline: none; transition: border-color 0.2s;
         }
-        input:focus, textarea:focus, select:focus { border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+        input:focus, textarea:focus, select:focus { border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(5,150,105,0.15); }
         textarea { min-height: 90px; resize: vertical; }
 
-        /* Estúdio de Gravação */
-        .audio-box { background: #f1f5f9; padding: 30px; border-radius: 8px; border: 1px dashed var(--primary-light); text-align: center; }
-        .timer { font-size: 2.5rem; font-weight: bold; font-family: monospace; color: var(--primary); margin: 15px 0; }
-        .controls { display: flex; justify-content: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+        /* Estúdio de Gravação Direta */
+        .audio-box { background: #f0fdf4; padding: 40px; border-radius: 8px; border: 2px dashed var(--primary-light); text-align: center; }
+        .timer { font-size: 3rem; font-weight: bold; font-family: monospace; color: var(--primary); margin: 20px 0; }
+        .controls { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
         
-        .btn { padding: 10px 18px; font-size: 0.95rem; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+        .btn { padding: 12px 22px; font-size: 1rem; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-primary:hover { background: var(--primary-light); }
-        .btn-danger { background: #ef4444; color: white; }
-        .btn-danger:hover { background: #dc2626; }
-        .btn-success { background: var(--secondary); color: white; }
-        .btn-success:hover { background: #0d9488; }
-        .btn-warning { background: var(--accent); color: white; }
+        .btn-danger { background: #b91c1c; color: white; }
+        .btn-danger:hover { background: #991b1b; }
+        .btn-success { background: #047857; color: white; }
+        .btn-success:hover { background: #065f46; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
         /* Checklist */
         .checklist { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .checklist-item { display: flex; align-items: flex-start; gap: 8px; font-size: 0.9rem; }
-        .checklist-item input { margin-top: 4px; }
+        .checklist-item input { accent-color: var(--primary); margin-top: 4px; }
 
-        .export-actions { background: #e0e7ff; padding: 20px; border-radius: 8px; text-align: center; margin-top: 20px; }
+        .export-actions { background: #f0fdf4; border: 1px solid #a7f3d0; padding: 24px; border-radius: 8px; text-align: center; margin-top: 20px; }
         .export-actions h3 { color: var(--primary); margin-bottom: 12px; }
         .export-buttons { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
 
-        #saveStatus { font-size: 0.85rem; color: #16a34a; font-weight: 600; }
+        #saveStatus { font-size: 0.85rem; color: #047857; font-weight: 600; }
 
         @media print {
-            body { padding: 0; background: #fff; }
+            body { padding: 0; background: #fff; color: #000; }
             .wrapper { box-shadow: none; border: none; padding: 0; }
             .no-print { display: none !important; }
-            input, textarea, select { border: none !important; background: transparent !important; padding: 0 !important; }
+            input, textarea, select { border: none !important; background: transparent !important; padding: 0 !important; color: #000 !important; }
             textarea { resize: none; }
         }
     </style>
@@ -105,15 +101,15 @@
         <span id="saveStatus">💾 Salvo automaticamente</span>
     </header>
 
-    <!-- TELA INICIAL COM OS DOIS BOTÕES -->
+    <!-- TELA INICIAL COM DOIS BOTÕES -->
     <div id="homeScreen" class="module-view active">
-        <h2>Bem-vindo(a) ao Projeto RH em Voz</h2>
-        <p>Escolha a opção desejada para gerenciar o roteiro ou gravar o seu episódio:</p>
+        <h2>Projeto RH em Voz</h2>
+        <p>Selecione abaixo a ferramenta desejada para iniciar:</p>
         <div class="home-buttons">
             <button class="big-btn" onclick="switchModule('roteiroModule')">
                 📝 Gerar Roteiro
             </button>
-            <button class="big-btn audio-btn" onclick="switchModule('estudioModule')">
+            <button class="big-btn" onclick="switchModule('estudioModule')">
                 🎙️ Gerar Áudio Podcast
             </button>
         </div>
@@ -122,7 +118,7 @@
     <!-- MÓDULO 1: ROTEIRO E FORMULÁRIO -->
     <div id="roteiroModule" class="module-view">
         <div class="back-bar no-print">
-            <button class="btn btn-warning" onclick="goHome()">⬅️ Voltar ao Início</button>
+            <button class="btn btn-primary" onclick="goHome()">⬅️ Voltar ao Início</button>
         </div>
 
         <form id="podcastForm">
@@ -229,7 +225,7 @@
                 </div>
             </section>
 
-            <section style="border-left: 4px solid var(--accent);">
+            <section style="border-left: 4px solid var(--primary-light);">
                 <h2>3. Desafio Especial — E se o RH fosse você?</h2>
                 <div class="form-group">
                     <label for="problemaIdentificado">1. Qual é o problema identificado?</label>
@@ -270,51 +266,42 @@
             </section>
 
             <div class="export-actions no-print">
-                <h3>📥 Exportar Roteiro Concluído</h3>
+                <h3>📥 Exportar Roteiro Oficial (Cores: Preto e Verde Corporativo)</h3>
                 <div class="export-buttons">
                     <button type="button" class="btn btn-primary" onclick="exportDocx()">📄 Baixar Word (.docx)</button>
                     <button type="button" class="btn btn-success" onclick="exportDoc()">📝 Baixar DOC (.doc)</button>
-                    <button type="button" class="btn btn-warning" onclick="exportTxt()">📄 Baixar TXT (.txt)</button>
-                    <button type="button" class="btn btn-primary" style="background:#475569;" onclick="window.print()">🖨️ Salvar em PDF</button>
+                    <button type="button" class="btn btn-primary" style="background:#047857;" onclick="exportTxt()">📄 Baixar TXT (.txt)</button>
+                    <button type="button" class="btn btn-primary" style="background:#111827;" onclick="window.print()">🖨️ Salvar em PDF</button>
                 </div>
             </div>
         </form>
     </div>
 
-    <!-- MÓDULO 2: ESTÚDIO DE GRAVAÇÃO DE ÁUDIO -->
+    <!-- MÓDULO 2: ESTÚDIO DE GRAVAÇÃO DIRETA -->
     <div id="estudioModule" class="module-view">
         <div class="back-bar no-print">
-            <button class="btn btn-warning" onclick="goHome()">⬅️ Voltar ao Início</button>
+            <button class="btn btn-primary" onclick="goHome()">⬅️ Voltar ao Início</button>
         </div>
 
         <section>
-            <h2>🎙️ Estúdio de Gravação e Reprodução de Áudio</h2>
-            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px;">
-                Grave, ouça quantas vezes precisar e baixe o áudio do seu episódio em formato pronto para uso.
+            <h2>🎙️ Estúdio de Gravação Direta (MP3 / WebM)</h2>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px;">
+                Grave o seu episódio diretamente e obtenha o arquivo de áudio pronto para download imediato.
             </p>
             <div class="audio-box">
                 <div class="timer" id="timerDisplay">00:00</div>
                 <div class="controls">
-                    <button type="button" id="btnStartRecord" class="btn btn-primary">🔴 Gravar Áudio</button>
-                    <button type="button" id="btnStopRecord" class="btn btn-danger" disabled>⏹️ Parar Gravação</button>
+                    <button type="button" id="btnStartRecord" class="btn btn-primary">🔴 Iniciar Gravação</button>
+                    <button type="button" id="btnStopRecord" class="btn btn-danger" disabled>⏹️ Parar e Baixar MP3</button>
                 </div>
-
-                <div id="playbackSection" style="display:none; margin-top: 20px; border-top: 1px solid var(--border); padding-top: 15px;">
-                    <h4 style="color: var(--primary); margin-bottom: 10px;">▶️ Pré-escuta do Episódio Gravado:</h4>
-                    <audio id="audioPreview" controls style="width: 100%; margin-bottom: 15px;"></audio>
-                    <div>
-                        <a id="downloadAudioBtn" class="btn btn-success" style="text-decoration:none;">
-                            📥 Baixar Áudio Gravado (MP3 / WebM)
-                        </a>
-                    </div>
-                </div>
+                <div id="downloadArea" style="margin-top: 20px;"></div>
             </div>
         </section>
     </div>
 </div>
 
 <script>
-    // Gerenciador de Módulos (Telas)
+    // Gerenciamento de Telas
     function switchModule(moduleId) {
         document.querySelectorAll('.module-view').forEach(el => el.classList.remove('active'));
         document.getElementById(moduleId).classList.add('active');
@@ -372,7 +359,7 @@
 
     window.addEventListener('DOMContentLoaded', loadFromStorage);
 
-    /* --- LÓGICA DE GRAVAÇÃO E REPRODUÇÃO ESTÁVEL --- */
+    /* --- GRAVAÇÃO DIRETA E DOWNLOAD AUTOMÁTICO DE ÁUDIO --- */
     let mediaRecorder;
     let audioChunks = [];
     let timerInterval;
@@ -381,9 +368,7 @@
     const timerDisplay = document.getElementById('timerDisplay');
     const btnStart = document.getElementById('btnStartRecord');
     const btnStop = document.getElementById('btnStopRecord');
-    const audioPreview = document.getElementById('audioPreview');
-    const playbackSection = document.getElementById('playbackSection');
-    const downloadAudioBtn = document.getElementById('downloadAudioBtn');
+    const downloadArea = document.getElementById('downloadArea');
 
     btnStart.addEventListener('click', async () => {
         try {
@@ -396,22 +381,22 @@
             };
 
             mediaRecorder.onstop = () => {
-                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
                 const audioUrl = URL.createObjectURL(audioBlob);
                 
-                audioPreview.src = audioUrl;
-                audioPreview.load();
-                playbackSection.style.display = 'block';
-
                 const epNum = document.getElementById('numEpisodio').value || '01';
-                downloadAudioBtn.href = audioUrl;
-                downloadAudioBtn.download = `RH-em-Voz-Episodio-${epNum}.webm`;
+                
+                downloadArea.innerHTML = `
+                    <a href="${audioUrl}" download="RH-em-Voz-Episodio-${epNum}.mp3" class="btn btn-success" style="font-size: 1.1rem; padding: 14px 28px;">
+                        📥 Clique aqui para baixar seu arquivo MP3
+                    </a>
+                `;
             };
 
             mediaRecorder.start();
             btnStart.disabled = true;
             btnStop.disabled = false;
-            playbackSection.style.display = 'none';
+            downloadArea.innerHTML = '';
 
             secondsElapsed = 0;
             timerInterval = setInterval(() => {
@@ -437,7 +422,7 @@
         btnStop.disabled = true;
     });
 
-    /* --- EXPORTADORES --- */
+    /* --- EXPORTADORES COM CORES PRETO E VERDE CORPORATIVO --- */
     function getFormData() {
         const d = {};
         formFields.forEach(id => {
@@ -460,7 +445,17 @@
 
     function exportDoc() {
         const d = getFormData();
-        const html = `<html><head><meta charset='utf-8'></head><body><h2>ROTEIRO RH EM VOZ</h2><p><b>Tema:</b> ${d.tema}</p><p><b>Integrantes:</b> ${d.integrantes}</p><p><b>Introdução:</b> ${d.introducao}</p><p><b>Desenvolvimento:</b> ${d.perguntasNorteadoras}</p><p><b>Conclusão:</b> ${d.conclusaoEpisodio}</p></body></html>`;
+        const html = `<html><head><meta charset='utf-8'><style>body{color:#111827;font-family:Arial;} h2{color:#064e3b;border-bottom:2px solid #059669;padding-bottom:5px;}</style></head><body>
+            <h2 style="color:#064e3b;">ROTEIRO OFICIAL - PODCAST RH EM VOZ</h2>
+            <p><b>Tema:</b> ${d.tema}</p><p><b>Integrantes:</b> ${d.integrantes}</p>
+            <h3 style="color:#059669;">1. Identificação</h3>
+            <p><b>Data:</b> ${d.data} | <b>Episódio:</b> ${d.numEpisodio} | <b>Turma:</b> ${d.turma}</p>
+            <p><b>Apresentador:</b> ${d.apresentador}</p>
+            <h3 style="color:#059669;">2. Desenvolvimento</h3>
+            <p><b>Introdução:</b> ${d.introducao}</p>
+            <p><b>Perguntas Norteadoras:</b> ${d.perguntasNorteadoras}</p>
+            <p><b>Conclusão:</b> ${d.conclusaoEpisodio}</p>
+        </body></html>`;
         const blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
         saveAs(blob, `Roteiro_RH_em_Voz_Ep_${d.numEpisodio || '01'}.doc`);
     }
@@ -472,9 +467,14 @@
             sections: [{
                 children: [
                     new Paragraph({ text: "ROTEIRO OFICIAL - PODCAST RH EM VOZ", heading: HeadingLevel.HEADING_1 }),
-                    new Paragraph({ children: [new TextRun({ text: `Tema: ${d.tema}`, bold: true })] }),
-                    new Paragraph({ children: [new TextRun({ text: `Integrantes: ${d.integrantes}` })] }),
-                    new Paragraph({ children: [new TextRun({ text: `Introdução: ${d.introducao}` })] })
+                    new Paragraph({ children: [new TextRun({ text: `Tema: ${d.tema}`, bold: true, color: "064E3B" })] }),
+                    new Paragraph({ children: [new TextRun({ text: `Integrantes: ${d.integrantes}`, color: "111827" })] }),
+                    new Paragraph({ text: "" }),
+                    new Paragraph({ text: "1. Introdução", heading: HeadingLevel.HEADING_2 }),
+                    new Paragraph({ children: [new TextRun({ text: d.introducao })] }),
+                    new Paragraph({ text: "" }),
+                    new Paragraph({ text: "2. Desenvolvimento e Perguntas Norteadoras", heading: HeadingLevel.HEADING_2 }),
+                    new Paragraph({ children: [new TextRun({ text: d.perguntasNorteadoras })] })
                 ]
             }]
         });
