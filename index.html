@@ -3,11 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Práxis - Psicopedagogia</title>
+    <title>RH em Voz - Podcast</title>
     <style>
         :root {
             --primary: #4f46e5;
             --primary-hover: #4338ca;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --success: #10b981;
             --bg: #f8fafc;
             --card-bg: #ffffff;
             --text: #1e293b;
@@ -36,7 +39,7 @@
 
         .container {
             width: 100%;
-            max-width: 600px;
+            max-width: 650px;
             background: var(--card-bg);
             padding: 30px;
             border-radius: var(--radius);
@@ -45,7 +48,7 @@
 
         h1 {
             font-size: 1.5rem;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
             color: var(--primary);
         }
 
@@ -83,10 +86,71 @@
 
         textarea {
             resize: vertical;
-            min-height: 100px;
+            min-height: 80px;
         }
 
-        button {
+        .recorder-section {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .recorder-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            flex: 1;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background-color: var(--danger-hover);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        audio {
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        #timer {
+            font-weight: 600;
+            color: var(--text-light);
+            text-align: center;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        button[type="submit"] {
             background-color: var(--primary);
             color: white;
             border: none;
@@ -97,10 +161,9 @@
             cursor: pointer;
             width: 100%;
             transition: background-color 0.2s;
-            margin-top: 8px;
         }
 
-        button:hover {
+        button[type="submit"]:hover {
             background-color: var(--primary-hover);
         }
 
@@ -112,62 +175,136 @@
             border: 1px solid var(--border);
             display: none;
         }
-
-        #output h3 {
-            font-size: 1rem;
-            margin-bottom: 8px;
-            color: var(--primary);
-        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>Plataforma Práxis</h1>
-        <p class="subtitle">Espaço de Intervenção Psicopedagógica</p>
+        <h1>Projeto RH em Voz</h1>
+        <p class="subtitle">Gestão de Episódios e Gravação de Áudio</p>
         
-        <form id="praxisForm">
+        <form id="podcastForm">
             <div class="form-group">
-                <label for="studentName">Nome do Aluno / Atendido</label>
-                <input type="text" id="studentName" required placeholder="Digite o nome completo">
+                <label for="episodeTitle">Título do Episódio</label>
+                <input type="text" id="episodeTitle" required placeholder="Ex: Comunicação Assertiva no Trabalho">
             </div>
 
             <div class="form-group">
-                <label for="sessionType">Tipo de Atendimento</label>
-                <select id="sessionType">
-                    <option value="Avaliação Psicopedagógica">Avaliação Psicopedagógica</option>
-                    <option value="Intervenção Cognitiva">Intervenção Cognitiva</option>
-                    <option value="Orientação Escolar / Familiar">Orientação Escolar / Familiar</option>
+                <label for="guestName">Convidado / Participantes</label>
+                <input type="text" id="guestName" required placeholder="Nome dos participantes">
+            </div>
+
+            <div class="form-group">
+                <label for="category">Tema Principal</label>
+                <select id="category">
+                    <option value="Comunicação Organizacional">Comunicação Organizacional</option>
+                    <option value="Gestão de Pessoas">Gestão de Pessoas</option>
+                    <option value="Relações de Trabalho">Relações de Trabalho</option>
+                    <option value="Desenvolvimento Profissional">Desenvolvimento Profissional</option>
                 </select>
             </div>
 
-            <div class="form-group">
-                <label for="observations">Observações e Hipóteses</label>
-                <textarea id="observations" placeholder="Registre as observações da sessão..."></textarea>
+            <!-- Seção de Gravação de Áudio -->
+            <div class="recorder-section">
+                <label>Gravação do Episódio / Piteco de Áudio</label>
+                <div id="timer">00:00</div>
+                <div class="recorder-controls">
+                    <button type="button" id="btnRecord" class="btn">🔴 Gravar</button>
+                    <button type="button" id="btnStop" class="btn btn-danger" disabled>⏹️ Parar</button>
+                </div>
+                <audio id="audioPlayback" controls style="display:none;"></audio>
+                <a id="downloadLink" style="display:none; margin-top: 8px; display: inline-block; font-size: 0.9rem; text-decoration: none; color: var(--primary);" download="rh-em-voz-episodio.webm">📥 Baixar Arquivo de Áudio</a>
             </div>
 
-            <button type="submit">Salvar Registro</button>
+            <div class="form-group">
+                <label for="scriptNotes">Roteiro e Notas da Pauta</label>
+                <textarea id="scriptNotes" placeholder="Principais tópicos e perguntas discutidas..."></textarea>
+            </div>
+
+            <button type="submit">Salvar Registro do Episódio</button>
         </form>
 
         <div id="output">
-            <h3>Registro Salvo com Sucesso!</h3>
+            <h3 style="color: var(--primary); margin-bottom: 8px;">Episódio Cadastrado com Sucesso!</h3>
             <p id="resultText"></p>
         </div>
     </div>
 
     <script>
-        document.getElementById('praxisForm').addEventListener('submit', function(e) {
+        let mediaRecorder;
+        let audioChunks = [];
+        let timerInterval;
+        let seconds = 0;
+
+        const btnRecord = document.getElementById('btnRecord');
+        const btnStop = document.getElementById('btnStop');
+        const audioPlayback = document.getElementById('audioPlayback');
+        const downloadLink = document.getElementById('downloadLink');
+        const timerDisplay = document.getElementById('timer');
+
+        btnRecord.addEventListener('click', async () => {
+            audioChunks = [];
+            seconds = 0;
+            timerDisplay.textContent = "00:00";
+            
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+
+                mediaRecorder.ondataavailable = event => {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    
+                    audioPlayback.src = audioUrl;
+                    audioPlayback.style.display = 'block';
+
+                    downloadLink.href = audioUrl;
+                    downloadLink.style.display = 'inline-block';
+                };
+
+                mediaRecorder.start();
+                btnRecord.disabled = true;
+                btnStop.disabled = false;
+
+                timerInterval = setInterval(() => {
+                    seconds++;
+                    let mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+                    let secs = (seconds % 60).toString().padStart(2, '0');
+                    timerDisplay.textContent = `${mins}:${secs}`;
+                }, 1000);
+
+            } catch (err) {
+                alert('Erro ao acessar o microfone. Verifique as permissões do seu navegador.');
+                console.error(err);
+            }
+        });
+
+        btnStop.addEventListener('click', () => {
+            mediaRecorder.stop();
+            // Para todas as faixas do stream do microfone
+            mediaRecorder.stream.getTracks().forEach(track => track.stop());
+            
+            clearInterval(timerInterval);
+            btnRecord.disabled = false;
+            btnStop.disabled = true;
+        });
+
+        document.getElementById('podcastForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const name = document.getElementById('studentName').value;
-            const type = document.getElementById('sessionType').value;
-            const obs = document.getElementById('observations').value;
+            const title = document.getElementById('episodeTitle').value;
+            const guest = document.getElementById('guestName').value;
+            const category = document.getElementById('category').value;
+            const notes = document.getElementById('scriptNotes').value;
 
             const resultText = document.getElementById('resultText');
-            resultText.innerHTML = `<strong>Aluno:</strong> ${name}<br><strong>Tipo:</strong> ${type}<br><strong>Notas:</strong> ${obs || 'Nenhuma observação registrada.'}`;
+            resultText.innerHTML = `<strong>Episódio:</strong> ${title}<br><strong>Participantes:</strong> ${guest}<br><strong>Tema:</strong> ${category}<br><strong>Pauta:</strong> ${notes || 'Sem anotações.'}`;
             
             document.getElementById('output').style.display = 'block';
-            this.reset();
         });
     </script>
 
